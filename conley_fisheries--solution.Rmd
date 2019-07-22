@@ -1,0 +1,93 @@
+---
+title: " "
+author: " "
+date: " "
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Note:  
+
+- Change the information in the yaml header above:  title, author, data.
+- Make sure output is html_document.
+- Once you are finished coding, run each chunk individually to make sure there are no errors.  (If necessary fix your code.) Once your code is error-free, click "knit" on the menu above. Your document should compile to HTML, provided that you have output set to "html_document."
+- In the code chunk above ("setup") echo is set to TRUE.  This means that the code in your chunks will be displayed, along with the results, in your compiled document.
+- Please delete these and other directions before compiling and submitting your assignment.
+
+## Load packages and create empty data frame
+
+```{r}
+# Load packages
+library(tidyverse) 
+
+# Define n
+n <- 1000
+
+# Empty data frame for 1000 simulated days
+d <- data.frame(day = seq(1:n),
+                demand = NA,
+                quantity = NA,
+                price = NA,
+                earnings = NA)
+
+head(d)
+
+```
+
+Your goal in this project is to:
+
+1. Fill in the dataset with random numbers drawn from the probability distributions defined in the case description---distributions for demand, quantity and price.
+2. Use those numbers to compute earnings.
+3. Summarize the earnings distribution to inform a business recommendation.
+
+## Questions
+
+Lightly comment your code and use pipes for readability.
+
+Comment briefly on each of the questions, as directed.  Only the the final question requires a more lengthy (~ 2 paragraph) response.
+
+### Q1
+
+
+```{r}
+
+```
+
+### Q2
+
+
+```{r}
+
+```
+
+### Q3
+
+```{r}
+
+```
+
+### Q4
+
+```{r}
+
+```
+
+
+### Q5
+
+```{r}
+
+```
+
+### Q6
+
+
+```{r}
+
+```
+
+## Q7
+

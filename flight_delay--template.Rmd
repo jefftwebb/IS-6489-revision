@@ -1,0 +1,164 @@
+---
+title: ""
+author: ""
+date: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Note:  
+
+- Change the information in the yaml header above:  title, author, data.
+- Make sure output is html_document.
+- Once you are finished coding, run each chunk individually to make sure there are no errors.  (If necessary fix your code.) Once your code is error-free, click "knit" on the menu above. Your document should compile to HTML, provided that you have output set to "html_document."
+- In the code chunk above ("setup") echo is set to TRUE.  This means that the code in your chunks will be displayed, along with the results, in your compiled document.
+- Please delete these and other directions before compiling and submitting your assignment.
+
+## Load packages and data
+
+```{r}
+# Load packages
+library(tidyverse) # lubridate for wrangling dates is included in tidyverse
+
+# Load data
+d <- read_csv("flight_delay.csv")
+
+# Inspect data
+glimpse(d)
+summary(d)
+
+```
+
+Note that the back ticks in the column names allow the inclusion of spaces.
+
+The dataset has some problems, some of which are clear when using glimpse():
+
+- Scheduled departure time and scheduled arrival time are date/time variables, which is appropriate. But actual arrival time is a character variable, as is arrival delay in minutes and the delay indicator. A little investigation shows that the presence of a character value, "canceled," has caused the values in these columns to be interpreted as character values.
+- Day of week is numeric. It should be a factor variable. Likewise, route code is numeric; it also should be a factor variable.
+- There are rows at the bottom of the table populated entirely by NAs.
+- Number of passengers has no observations for MDA.
+
+Please verify these points yourself. A handy thing to do is to look at the data in the RStudio file viewer (click on the spreadsheet icon to the right of the data object in the Environment pane), and explore it visually for anomalies. Another useful tactic is to use the summary() function. And still another tactic is to use the table() function for each column with the useNA argument set to "always" (useNA = "always"). This will show you the unique values in each column, including NAs.
+
+```{r}
+# Use table() to peruse unique values in each column
+table(d[,1], useNA = "always") # Airline
+table(d[,2], useNA = "always") # "Origin airport"   
+table(d[,3], useNA = "always") # "Destination airport"
+table(d[,4], useNA = "always") # "Departure date" 
+table(d[,7], useNA = "always") # "Actual arrival time" 
+table(d[,8], useNA = "always") # "Arrival delay in minutes"
+table(d[,9], useNA = "always") # "Delay indicator" 
+table(d[,10], useNA = "always") # "Day of Week" 
+table(d[,11], useNA = "always") # Route code
+table(d[,12], useNA = "always") # Number of passengers
+```
+
+
+## Prepare data for analysis
+
+Do some cleaning. Our focus will be on the delay, departure and arrival variables so we won't address other data problems or transform other data types.
+
+- Remove the NA's at the bottom of the data set.
+- We can't remove the rows with "Cancelled" in the "Actual arrival time" column because that information is important to calculate on time vs. delayed flights according to FAA definitions. So, use parse_time() to convert "Actual arrival time" to a time variable and produce NAs for "cancelled."
+- Convert "Arrival delay in minutes" into a numeric variable type with as.numeric(). This will automatically convert "N\\A" into NA.
+- Likewise convert "Delay indicator" into a numeric variable type with as.numeric(). This will automatically convert "N\\A" into NA. 
+- Make "Day of Week" and "Route Code" into factor variables. 
+- Change "Route Code" into actual route names.
+- Calculate flight length variables so we can compare scheduled vs. actual flight lengths.
+
+```{r}
+# Remove bottom 10 rows, clean, feature engineer
+
+d <- d[1:360,] %>% 
+  mutate(`Arrival delay in minutes` = as.numeric(`Arrival delay in minutes`),
+         `Delay indicator` = as.numeric(`Delay indicator`),
+         `Day of Week` = as.factor(`Day of Week`),
+         `Route Code` = as.factor(`Route Code`),
+         `Route Code` = fct_recode(`Route Code`, "DFW/MSY" = "1", "MSY/DFW" = "2", "MSY/PNS" = "3", "PNS/MSY" = "4"),
+         actual_arrival = parse_time(`Actual arrival time`),
+         scheduled_flight_length =`Scheduled arrival time` - `Scheduled departure time`,
+         actual_flight_length = actual_arrival - `Scheduled departure time`,
+         scheduled_flight_length = as.numeric(scheduled_flight_length)/60,
+         actual_flight_length = as.numeric(actual_flight_length)/60)
+
+glimpse(d)
+summary(d)
+```
+
+## Questions
+
+Lightly comment your code and use pipes for readability.
+
+Comment briefly on each of the questions, as directed.  Only the the final question requires a more lengthy (~ 2 paragraph) response.
+
+### Q1
+
+Compute the mean, median, 90th percentile, and standard deviation of the number of arrival delay minutes of RegionEx's flights. Do the same for MDA's flights. How do the two airlines compare?
+
+```{r}
+
+```
+
+### Q2
+
+Inspect the distribution of RegionEx's arrival delays by constructing a histogram of the number of arrival delay minutes of RegionEx's flights. Do the same for MDA's flights. How do these two distributions compare? Hint:  use facet_wrap().
+
+
+```{r}
+
+```
+
+### Q3
+
+Using the FAA definition of a "late" flight, what percentage of RegionEx's September flights were "late"? What percentage of MDA's September flights were "late"? What percentage were "on‐time" for each airline, according to the FAA definition?
+
+```{r}
+
+```
+
+### Q4
+
+```{r}
+# Create summary tables
+
+# Table 1:  by Airline and route
+d %>% 
+  count(Airline, `Route Code`, `Delay indicator`) %>% 
+  group_by(Airline, `Route Code`) %>% 
+  mutate(percent_delay = (n/sum(n)*100) %>% round(1)) %>% 
+  filter(`Delay indicator`==1)
+
+# Table 2: by Airline.  
+d %>% 
+  count(Airline, `Delay indicator`) %>% 
+  group_by(Airline) %>% 
+  mutate(percent_delay = (n/sum(n)*100) %>% round(1)) %>% 
+  filter(`Delay indicator`==1)
+ 
+```
+
+In the tables above, we see that although RegionEx has a higher percentage of delayed flights in the aggregate (percent_delay in table 2: 26.2 vs 25.8), when we look at each route individually, RegionEx does no worse than MDA on any route (percent_delay in table 1). Moreover, on routes between DFW and MSY, it experiences a lower fraction of delayed flights than MDA. How do you explain this puzzling result?
+
+### Q5
+
+Consider the RegionEx flights only. Prepare a scatter plot of arrival delay minutes versus number of passengers. Your scatter plot should consist of 240 data points, one for each flight in the data set where the vertical axis is arrival delay minutes of that flight and the horizontal axis is the number of passengers. Color the points by route and facet by day of week. Briefly interpret (without overinterpreting) the plot.
+
+```{r}
+
+```
+
+### Q6
+
+Compare the scheduled flight durations for the two airlines on each of their four routes. Compare the actual flight durations. What do you notice? If the two airlines had the same scheduled duration, what impact would this have on their delay records?
+
+```{r}
+
+```
+
+## Q7
+
+Does the data support the claim that the on‐time performance of RegionEx is worse than that of MDA? Write two paragraphs in which you argue a position.

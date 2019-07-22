@@ -1,0 +1,51 @@
+---
+title: "flight_delay_exploration"
+author: "Jeff Webb"
+date: "7/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1
+
+1. Compute the mean, median, 90th percentile, and standard deviation of the number of arrival delay minutes of RegionEx’s flights. Do the same for MDA's flights. How do the two airlines compare?
+
+```{r}
+library(tidyverse)
+library(lubridate)
+d <- read_csv("flight_delay.csv")
+glimpse(d)
+
+
+table(d$Airline)
+
+d <- d %>% 
+  mutate(delay = as.numeric(`Arrival delay in minutes`)) %>% 
+  filter(!is.na(delay))
+
+summary(d)
+
+d  %>% 
+  group_by(Airline) %>% 
+  summarize(n = n(),
+            avg_delay = mean(delay, na.rm=T),
+            median_delay = median(delay, na.rm=T),
+            p90 = quantile(delay, probs=c(.9), na.rm=T),
+            sd = sd(delay, na.rm=T)) 
+```
+
+## Q2
+
+Visualize delay. High outliers but typical performance is better.
+
+```{r}
+ggplot(d, aes(delay)) +
+  geom_histogram() + 
+  facet_wrap(~Airline)
+```
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

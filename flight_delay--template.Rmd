@@ -62,7 +62,7 @@ table(d[,12], useNA = "always") # Number of passengers
 
 Do some cleaning. Our focus will be on the delay, departure and arrival variables so we won't address other data problems or transform other data types.
 
-- Remove the NA's at the bottom of the data set.
+- Remove the 10 NA's at the bottom of the data set.
 - We can't remove the rows with "Cancelled" in the "Actual arrival time" column because that information is important to calculate on time vs. delayed flights according to FAA definitions. So, use parse_time() to convert "Actual arrival time" to a time variable and produce NAs for "cancelled."
 - Convert "Arrival delay in minutes" into a numeric variable type with as.numeric(). This will automatically convert "N\\A" into NA.
 - Likewise convert "Delay indicator" into a numeric variable type with as.numeric(). This will automatically convert "N\\A" into NA. 
@@ -74,11 +74,11 @@ Do some cleaning. Our focus will be on the delay, departure and arrival variable
 # Remove bottom 10 rows, clean, feature engineer
 
 d <- d[1:360,] %>% 
-  mutate(`Arrival delay in minutes` = as.numeric(`Arrival delay in minutes`),
+  mutate(delay = as.numeric(`Arrival delay in minutes`),
          `Delay indicator` = as.numeric(`Delay indicator`),
-         `Day of Week` = as.factor(`Day of Week`),
-         `Route Code` = as.factor(`Route Code`),
-         `Route Code` = fct_recode(`Route Code`, "DFW/MSY" = "1", "MSY/DFW" = "2", "MSY/PNS" = "3", "PNS/MSY" = "4"),
+         `Day of Week` = factor(`Day of Week`),
+         `Route Code` = factor(`Route Code`),
+         `Route Code` = recode_factor(`Route Code`, "1" = "DFW/MSY", "2" = "MSY/DFW", "3" = "MSY/PNS", "4" = "PNS/MSY"),
          actual_arrival = parse_time(`Actual arrival time`),
          scheduled_flight_length =`Scheduled arrival time` - `Scheduled departure time`,
          actual_flight_length = actual_arrival - `Scheduled departure time`,
@@ -114,13 +114,19 @@ Inspect the distribution of RegionEx's arrival delays by constructing a histogra
 
 ### Q3
 
-Using the FAA definition of a "late" flight, what percentage of RegionEx's September flights were "late"? What percentage of MDA's September flights were "late"? What percentage were "on‐time" for each airline, according to the FAA definition?
+Using the FAA definition of a "late" flight, what percentage of RegionEx's September flights were late and on-time? What percentage of MDA's September flights were late and on-time? Recall the FAA's definitions:
+
+"Each flight falls into one of four categories: delayed, diverted, cancelled, or on time. The FAA defines a flight to be delayed if it arrives at its scheduled destination 15 or more minutes later than its scheduled arrival time. Flights can also be diverted to another airport, or cancelled. A flight that arrives at its scheduled destination within 15 min- utes of its scheduled arrival time (that is, a flight that is not delayed, diverted, or cancelled) is considered on time."
+
+So a flight that is cancelled is neither delayed nor on-time.
 
 ```{r}
 
 ```
 
 ### Q4
+
+In the tables below, we see that although RegionEx has a higher percentage of delayed flights in the aggregate (percent_delay in table 2: 26.2 vs 25.8), when we look at each route individually, RegionEx does no worse than MDA on any route (percent_delay in table 1). Moreover, on routes between DFW and MSY, it experiences a lower fraction of delayed flights than MDA. How do you explain this puzzling result?
 
 ```{r}
 # Create summary tables
@@ -141,11 +147,11 @@ d %>%
  
 ```
 
-In the tables above, we see that although RegionEx has a higher percentage of delayed flights in the aggregate (percent_delay in table 2: 26.2 vs 25.8), when we look at each route individually, RegionEx does no worse than MDA on any route (percent_delay in table 1). Moreover, on routes between DFW and MSY, it experiences a lower fraction of delayed flights than MDA. How do you explain this puzzling result?
+
 
 ### Q5
 
-Consider the RegionEx flights only. Prepare a scatter plot of arrival delay minutes versus number of passengers. Your scatter plot should consist of 240 data points, one for each flight in the data set where the vertical axis is arrival delay minutes of that flight and the horizontal axis is the number of passengers. Color the points by route and facet by day of week. Briefly interpret (without overinterpreting) the plot.
+Consider the RegionEx flights only. Prepare a scatter plot of arrival delay in minutes versus number of passengers. Your scatter plot should consist of 240 data points, one for each flight in the data set where the vertical axis is arrival delay minutes of that flight and the horizontal axis is the number of passengers. Color the points by route and facet by day of week. Briefly interpret (without overinterpreting) the plot.
 
 ```{r}
 

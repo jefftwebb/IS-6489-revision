@@ -91,17 +91,18 @@ The normal or Gaussian distribution is useful because it describes a wide range 
 Here is code to draw 10 observations from $N(0,1)$:
 
 ```{r random, exercise = T}
-
-rnorm(10, mean = 0, sd = 1)
+# Simulate from N(0,1)
 rnorm(10, mean = 0, sd = 1)
 ```
 
-Every time this code is run the numbers will change, since these are random draws. In order to take random draws that do not change---and to use numbers that are therefore suitable for reproducible data analysis---we must set a random seed using the `set.seed()` function before running any random process.  The argument to `set.seed()` is a number.  It doesn't matter which number. As a general rule, **always set the seed.**
+These are random draws, so every time this code is run the numbers will change.  Try it. In order to take random draws that do not change---and to use numbers that are therefore suitable for reproducible data analysis---we must set a random seed using the `set.seed()` function before running any random process.  The argument to `set.seed()` is a number.  It doesn't matter which number. As a general rule, **always set the seed.**
 
 ```{r random1, exercise = T}
+# Draw with set.seed(123)
 set.seed(123)
 rnorm(10, mean = 0, sd = 1)
 
+# Identical random draw
 set.seed(123)
 rnorm(10, mean = 0, sd = 1)
 ```
@@ -115,6 +116,7 @@ The binomial distribution is important because it forms the basis of many other 
 Here is code to draw 10 observations from, for example, a $Binomial(10, .5)$:
 
 ```{r random2, exercise = T}
+# Draw from Binomial(10, .5)
 set.seed(123)
 rbinom(n = 10, size = 10, prob = .5)
 ```
@@ -161,7 +163,10 @@ rbinom(n = 10, size = 10, prob = .5)
 The `sample()` function can be used to draw from any categorical distribution.  As an introduction, consider that these two code snippets are exactly equivalent:
 
 ```{r random3, exercise =T}
+# Draw from Binomial(1, .5) with rbinom()
 rbinom(n = 10, size = 1, prob = .5)
+
+# Draw from Binomial(1, .5) with sample()
 sample(x = c(0, 1), size = 10, replace = T, prob = c(.5, .5))
 
 ```
@@ -175,6 +180,7 @@ In contrast to `rbinom()`, the `size` argument in `sample()` represents the *num
 Here is code to take 50 random draws from four categories---A, B, C, D---with probability of .1, .2, .3, .4, respectively. 
 
 ```{r random4, exercise=T}
+# Sample from 4 categories with defined probability
 set.seed(123)
 sample(c("A", "B", "C", "D"), 
        size = 50, 
@@ -186,6 +192,7 @@ sample(c("A", "B", "C", "D"),
 With `size = 50` the proportions should be close to what we defined (but would, of course, become more exact with larger n):
 
 ```{r random5, exercise=T}
+# Summarize proportions in random sample
 set.seed(123)
 sample(c("A", "B", "C", "D"), 
        size = 20, 
@@ -220,6 +227,7 @@ suppressWarnings(print(plt))
 Here is the code for doing this calculation:
 
 ```{r}
+# Calculate CDF [neg inf, 0]
 pnorm(q = 0, mean = 0, sd = 1)
 ```
 
@@ -240,6 +248,7 @@ suppressWarnings(print(plt))
 We subtract the cumulative probability up to $q = -1$ from the larger cumulative probability up to $q = 1$. Here is the calculation using `pnorm()`.  
 
 ```{r calc, exercise = T}
+# Calculate CDF [-1, 1]
 pnorm(q = 1, mean = 0, sd = 1) - 
   pnorm(q = -1, mean = 0, sd = 1)
 ```
@@ -247,6 +256,7 @@ pnorm(q = 1, mean = 0, sd = 1) -
 Incidentally, we can approximate this exact calculation with simulation using `rnorm()`:
 
 ```{r calc_alt, exercise = T}
+# Simulate CDF [-1, 1]
 set.seed(123)
 sims <- 100000
 draws <- rnorm(n = sims, mean = 0, sd = 1) 
@@ -260,6 +270,7 @@ Notice that I have defined the number of simulations---`sims <- 100000`---at the
 We can, of course, calculate a CDF for a discrete distribution also, such as $Binomial(1,.5)$. How much of the probability in this distribution is associated with 0 rather than 1?  Another way to put the question:  what is the relative frequency of 0's in the distribution as opposed to 1's?  This should be .5 by definition.
 
 ```{r}
+# Calculate CDF for [0, 0]
 pbinom(q = 0, size = 1, prob = .5)
 ```
 
@@ -278,6 +289,7 @@ Bonanza Oil is drilling for oil at three promising sites. According to geologica
 $P(\text{oil}) = P(A \:\text{and}\: B \:\text{and}\: C)$ = .7 x .85 x .8 
 
 ```{r discrete, exercise=TRUE}
+# Calculate p(oil) using probability rules
 .7 * .85 * .8
 
 ```
@@ -289,12 +301,16 @@ Finding oil at all three sites and finding oil at none of the sites are mutually
 Let's say you have forgotten all of the probability rules. Could you simulate this result? Yes. The value of simulation is that it  offers a general solution to these sorts of problems. The challenge is to correctly identify the type of event being simulated. In this case the event is the discovery of oil at a particular site, which is binary: oil is either discovered or not discovered. So we will model discovery as a binomial random variable of size 1 with the stipulated probabilities and use the `rbinom()` function to draw from each distribution.
 
 ```{r sim1, exercise=TRUE}
+# Simulate oil discovery at 3 sites
 set.seed(123)
 site1 <- rbinom(n = sims, size = 1, prob = .7)
 site2 <- rbinom(n = sims, size = 1, prob = .85)
 site3 <- rbinom(n = sims, size = 1, prob = .8)
 
+# Estimate p(oil)
 mean(site1 & site2 & site3)
+
+# Estimate p(no oil)
 mean(!(site1 & site2 & site3))
 
 ```
@@ -310,15 +326,19 @@ Let X be the number of cars in a group of 1000 cars that have painting defects. 
 $P(X \:\text{or}\: Y) = P(X) + P(Y) - P(X \:\text{and}\: Y)$ = .1 + .2 - .1 x .2
 
 ```{r sim2, exercise = T}
+# Calculate p(X or Y) using probability rules
 .1 + .2 - .1 * .2 
 ```
 
 Approximate this result with simulation:
 
 ```{r sim3, exercise = T}
+# Simulate X and Y
 set.seed(123)
 X <- rbinom(n = sims, size = 1, prob = .1)
 Y <- rbinom(n = sims, size = 1, prob = .2)
+
+# Estimate p(X or Y)
 mean(X | Y) %>% round(2)
 
 ```
@@ -338,6 +358,7 @@ The mean of a binomial distribution is $n*p$:  1000 x .28 = 280.
 We get the same result using simulation:
 
 ```{r sim4, exercise = T}
+# Estimate number of cars with defects
 (sum(X | Y)/100) %>%  round() 
 ```
 
@@ -345,9 +366,11 @@ We get the same result using simulation:
 (c)  In a batch of 1000 cars, what is the probability that the number of returned cars is less than or equal to 250?
 
 ```{r sim5, exercise = T} 
+# Estimate p(returned cars) <= 250 from simulation
 set.seed(123)
 sum(rbinom(n = sims, size = 1000, prob = .28) <= 250)/sims
 
+# Calculate directly from theoretical CDF
 pbinom(q = 250, size = 1000, prob = .28)
 ```
 
@@ -402,17 +425,27 @@ KLEERCO supplies under-hood emission-control air pumps to the automotive industr
 First, we will simulate an answer using `rnorm()`.
 
 ```{r calc4, exercise =T}
+# Simulate replacements
 set.seed(123)
 pump_lifespan <- rnorm(n = sims, mean = 61000, sd = 9000)
 
+# Estimate number of replacements
 (pump_lifespan < 50000) %>% 
   mean * 100
+
+```
+
+```{r echo=F}
+set.seed(123)
+pump_lifespan <- rnorm(n = sims, mean = 61000, sd = 9000)
+
 
 ```
 
 And here is an exact calculation using `pnorm()`:
 
 ```{r calc5, exercise=T}
+# Calculate replacements using theoretical CDF
 pnorm(q = 50000, mean = 61000, sd = 9000) * 100
 
 ```
@@ -420,6 +453,7 @@ pnorm(q = 50000, mean = 61000, sd = 9000) * 100
 (b)  What percentage of the company's pumps will fail at exactly 50,000 miles?
 
 ```{r  calc6, exercise=T}
+# Estimate p(failure == 50000)
 (pump_lifespan == 50000) %>% 
   mean * 100
 
@@ -430,9 +464,11 @@ This may seem like an odd result but, technically, the probability density of an
 (c)  What percentage of the company's pumps will fail at mileage between 42,000 and 57,000?
 
 ```{r  calc7, exercise=T}
+# Estimate p(replacement) between 42k and 57k
 (pump_lifespan > 42000 & pump_lifespan < 57000) %>% 
   mean * 100 # or
 
+# Calculate directly
 (pnorm(q = 57000, mean = 61000, sd = 9000) -
   pnorm(q = 42000, mean = 61000, sd = 9000)) *100
 
@@ -489,6 +525,7 @@ He thinks the number of kitchen staff---chef, wait staff, kitchen staff---would 
 **Set up an empty dataset**. Many columns will start out empty, to be filled with simulated values based on the above random variables. 1000 is a good number of simulations to start with.
 
 ```{r frame, exercise =T}
+# Set up empty data frame
 n <- 1000
 sim <- data.frame(months = 1:n,
                      fixed_costs = 3995,
@@ -502,6 +539,22 @@ head(sim)
 
 ```
 
+
+```{r echo=F}
+# Define empty data.frame
+n <- 1000
+sim <- data.frame(months = 1:n,
+                     fixed_costs = 3995,
+                     meals_sold = NA,
+                     price_per_meal = NA,
+                     profit_per_meal = NA,
+                     labor_costs = NA,
+                     profit = NA)
+
+
+
+```
+
 **Simulate values based on random variables** and fill in calculated fields. We already know fixed costs.  `Profit per meal` will be `price per meal` minus \$11. `Profit` will be a calculated field. `Profit` = `meals sold` x `profit per meal` - `labor costs` - `fixed costs`.
 
 The other columns will contain simulated values. 
@@ -509,6 +562,7 @@ The other columns will contain simulated values.
 Note that we will simulate labor costs from the [uniform distribution](https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)) using the `runif()` function.  A uniform distribution is continuous over a fixed interval defined by two parameters, minimum and maximum, and each observation has the same probability of being  drawn.
 
 ```{r simframe, exercise=T}
+# Fill in data frame with simulated values
 set.seed(123)
 sim <- sim %>% 
   mutate(meals_sold = rnorm(n = n, mean = 3000, sd = 1000),
@@ -526,6 +580,7 @@ head(sim)
 **Analyze the simulation.**   The estimate of profit now contains the variability in meals_sold, price_per_meal and labor_costs. Sanjay needs an income of \$5000. How does our simulated profit compare to this number? We can plot the distribution, and calculate its expected value and standard deviation, as well as the probability that  Sanjay's income from the restaurant would be less than \$5000---an important consideration.
 
 ```{r plot, exercise = T}
+# Visualize distribution of profit
 ggplot(sim, aes(profit)) +
   geom_density() +
   geom_vline(xintercept = 5000, col = 2) +
@@ -541,21 +596,31 @@ This is one of the virtues of a simulation study: it provides a sense of the ful
 So what is the mean of simulated profit?  Let's examine other summary numbers at the same time.
 
 ```{r summary, exercise = T}
+# Summarize profit
 sim$profit %>% 
   summary
 ```
 
 
-Average profit is over \$11,000 per month. But the minimum is actually a loss of almost \$9,000! What is the probability that Sanjay's monthly profit would be below his threshold of \$5000?
+Average profit is over \$11,000 per month. But the minimum is actually a loss of almost \$9,000! That is quite a bit of volatility. What is the probability that Sanjay's monthly profit would be below his threshold of \$5000?
 
 ```{r summary2,exercise = T}
+# Estimate p(profit < 5000)
 (sim$profit < 5000) %>% 
   mean
 ```
 
-Sanjay should therefore expect to make a monthly profit of less than \$5000 about  30% of the time, even as his average profit is substantially above that.
+What is the probability that Sanjay's monthly profit would be below \$0?
 
-Should he open the restaurant? That is his decision. But simulation modeling should make his decision  more informed.
+```{r summary2,exercise = T}
+# Estimate p(profit < 0)
+(sim$profit < 0) %>% 
+  mean
+```
+
+Sanjay should therefore expect to make a monthly profit of less than \$5000 about  30% of the time, and take a loss about 10% of the time, even as his average profit is substantially above that.
+
+Should he open the restaurant? That is his decision. But simulation modeling should help him make a  more informed decision.
 
 <!-- An athletic footwear company, Swift Shoes, is attempting to estimate the sales that will result from a television advertisement campaign of its new running shoe. The contribution to earnings from each pair of shoes sold is $40. Suppose that the probability that a television viewer will watch the advertisement (as opposed to turn his/her attention elsewhere) is .4. Furthermore, suppose that 1% of viewers who watch the advertisement on a local television channel will buy a pair of shoes. The company can buy television advertising time (denominated in dollars/minute) in one of the time slots according to this table: -->
 
